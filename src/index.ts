@@ -1,10 +1,22 @@
 import * as path from "path";
-import { TextDocument, Diagnostic } from "vscode-languageserver";
-import { VueInterpolationMode } from "vue-language-server/dist/modes/template/interpolationMode";
-import { getJavascriptMode } from "vue-language-server/dist/modes/script/javascript";
-import { getServiceHost } from "vue-language-server/dist/services/typescriptService/serviceHost";
-import { getLanguageModelCache } from "vue-language-server/dist/embeddedSupport/languageModelCache";
-import { getVueDocumentRegions } from "vue-language-server/dist/embeddedSupport/embeddedSupport";
+import { TextDocument } from "vscode-languageserver-textdocument"
+import { Diagnostic } from "vscode-languageserver";
+import { createConnection } from "vscode-languageserver/node"
+import {
+  VueInterpolationMode,
+  getJavascriptMode,
+  getServiceHost,
+  getLanguageModelCache,
+  getVueDocumentRegions,
+  createEnvironmentService,
+  EnvironmentService,
+  parseHTMLDocument,
+  HTMLDocument,
+  createDependencyService,
+  VueInfoService,
+  createRefTokensService,
+  getDefaultVLSConfig,
+} from "vls";
 import tsModule from "typescript";
 import ProgressBar from "progress";
 import {
@@ -22,12 +34,13 @@ interface Options {
   srcDir?: string;
   onlyTemplate?: boolean;
   onlyTypeScript?: boolean;
-  excludeDir?: string|string[];
+  excludeDir?: string | string[];
 }
 
 interface Source {
   docs: TextDocument[];
   workspace: string;
+  env: EnvironmentService;
   onlyTemplate: boolean;
 }
 
@@ -39,10 +52,12 @@ export async function check(options: Options) {
     validLanguages = ["ts", "tsx", "vue"];
   }
   const srcDir = options.srcDir || options.workspace;
+  const config = getDefaultVLSConfig()
+  const env = createEnvironmentService(workspace, srcDir, undefined, undefined, '', [], config);
   const excludeDirs = typeof excludeDir === "string" ? [excludeDir] : excludeDir;
   const docs = await traverse(srcDir, onlyTypeScript, excludeDirs);
 
-  await getDiagnostics({ docs, workspace, onlyTemplate });
+  await getDiagnostics({ docs, workspace, env, onlyTemplate });
 }
 
 async function traverse(
@@ -91,26 +106,42 @@ async function traverse(
   return docs;
 }
 
-async function getDiagnostics({ docs, workspace, onlyTemplate }: Source) {
+async function getDiagnostics({ docs, workspace, env, onlyTemplate }: Source) {
   const documentRegions = getLanguageModelCache(10, 60, (document) =>
     getVueDocumentRegions(document)
   );
   const scriptRegionDocuments = getLanguageModelCache(10, 60, (document) => {
-    const vueDocument = documentRegions.refreshAndGet(document);
-    return vueDocument.getSingleTypeDocument("script");
+    const vueDocumentRegions = documentRegions.refreshAndGet(document);
+    return vueDocumentRegions.getSingleTypeDocument("script");
   });
+  const vueDocument = getLanguageModelCache<HTMLDocument>(10, 60, document => parseHTMLDocument(document));
   let hasError = false;
+  const connection = createConnection(process.stdin, process.stdout)
   try {
     const serviceHost = getServiceHost(
       tsModule,
-      workspace,
+      env,
       scriptRegionDocuments
     );
-    const vueMode = new VueInterpolationMode(tsModule, serviceHost);
-    const scriptMode = await getJavascriptMode(
+    const vueMode = new VueInterpolationMode(
+      documentRegions,
+      tsModule,
       serviceHost,
-      scriptRegionDocuments as any,
-      workspace
+      env,
+      vueDocument
+    );
+    const dependencyService = await createDependencyService(workspace, workspace, false, []);
+    const refTokensService = createRefTokensService(connection)
+    const vueInfoService = new VueInfoService()
+    const scriptMode = await getJavascriptMode(
+      tsModule,
+      serviceHost,
+      env,
+      documentRegions,
+      dependencyService,
+      [],
+      vueInfoService,
+      refTokensService
     );
     const bar = new ProgressBar("checking [:bar] :current/:total", {
       total: docs.length,
@@ -118,10 +149,10 @@ async function getDiagnostics({ docs, workspace, onlyTemplate }: Source) {
       clear: true,
     });
     for (const doc of docs) {
-      const vueTplResults = vueMode.doValidation(doc);
+      const vueTplResults = await vueMode.doValidation(doc);
       let scriptResults: Diagnostic[] = [];
       if (!onlyTemplate && scriptMode.doValidation) {
-        scriptResults = scriptMode.doValidation(doc);
+        scriptResults = await scriptMode.doValidation(doc);
       }
       const results = vueTplResults.concat(scriptResults);
       if (results.length) {
