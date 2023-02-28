@@ -53,6 +53,7 @@ export async function check(options: Options) {
   }
   const srcDir = options.srcDir || options.workspace;
   const config = getDefaultVLSConfig()
+  config.vetur.experimental.templateInterpolationService = true;
   const env = createEnvironmentService(workspace, srcDir, undefined, undefined, '', [], config);
   const excludeDirs = typeof excludeDir === "string" ? [excludeDir] : excludeDir;
   const docs = await traverse(srcDir, onlyTypeScript, excludeDirs);
