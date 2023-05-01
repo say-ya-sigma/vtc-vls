@@ -20,23 +20,22 @@ const spec = (err, stdout) => {
   );
 
   assert.ok(
-    stdout.includes(`
-17:27 Property 'value' does not exist on type '{ value: number; }[]'. Did you mean 'values'?
-  15 |   },
-  16 |   methods() {
-> 17 |     console.log(this.items.value);
-     |                            ^^^^^
-  18 |   }
-  19 | });
-`)
+    stdout.includes(`ComponentOne.vue
+22:26 Property 'what' does not exist on type '{ error: string; success: string; }'.
+  20 |         success: 'success message'
+  21 |       }
+> 22 |       console.log(message.what);
+     |                           ^^^^
+  23 |     }
+  24 |   }`)
   );
 }
 
-exec(`node ${bin} --workspace ${fixtureDir}`, spec);
-exec(`node ${bin} --workspace ${fixtureDir} --onlyTypeScript`, spec);
-exec(`node ${bin} --workspace ${fixtureDir} --excludeDir ./`, (err, stdout) => {
+exec(`node ${bin} --rootDir ${fixtureDir}`, spec);
+exec(`node ${bin} --rootDir ${fixtureDir} --onlyTypeScript`, spec);
+exec(`node ${bin} --rootDir ${fixtureDir} --excludeDir ./`, (err, stdout) => {
   assert.equal(Boolean(err), false);
 });
-exec(`node ${bin} --workspace ${fixtureDir} --excludeDir ./ --excludeDir ./tests`, (err, stdout) => {
+exec(`node ${bin} --rootDir ${fixtureDir} --excludeDir ./ --excludeDir ./tests`, (err, stdout) => {
   assert.equal(Boolean(err), false);
 });

@@ -15,7 +15,13 @@ export default Vue.extend({
     };
   },
   methods() {
-    console.log(this.items.value);
+    () => {
+      const message = {
+        error: 'error message',
+        success: 'success message'
+      }
+      console.log(message.what);
+    }
   }
 });
 </script>
