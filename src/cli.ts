@@ -4,21 +4,21 @@ import minimist from "minimist";
 import { check } from "./index";
 
 const {
-  workspace,
+  rootDir,
   srcDir,
   onlyTemplate,
   onlyTypeScript,
   excludeDir,
 } = minimist(process.argv.slice(2));
 
-if (!workspace) {
-  throw new Error("--workspace is required");
+if (!rootDir) {
+  throw new Error("--rootDir is required");
 }
 
 const cwd = process.cwd();
 
 check({
-  workspace: path.resolve(cwd, workspace),
+  workspace: path.resolve(cwd, rootDir),
   srcDir: srcDir && path.resolve(cwd, srcDir),
   onlyTemplate,
   onlyTypeScript,
