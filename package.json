@@ -1,7 +1,7 @@
 {
   "name": "vue-type-check",
   "version": "1.1.0",
-  "description": "a type checker for typescript written Vue components",
+  "description": "a type checker for Vue2 SFC include template.",
   "main": "dist/index.js",
   "bin": {
     "vue-type-check": "dist/cli.js",
@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/Yuyz0112/vue-type-check.git"
+    "url": "https://github.com/seiya-sigma/vtc-vls"
   },
   "keywords": [
     "vue",
@@ -24,7 +24,7 @@
     "types",
     "vetur"
   ],
-  "author": "yanzhen@smartx.com",
+  "author": "seiya.sugimoto.free@gmail.com",
   "license": "MIT",
   "files": [
     "dist",
