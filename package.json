@@ -10,6 +10,7 @@
     "compile": "tsc -p .",
     "watch": "tsc --watch",
     "typings": "tsc -d --emitDeclarationOnly --declarationDir typings",
+    "prepare": "yarn compile && yarn typings",
     "start": "node dist/index.js",
     "test": "node tests/component.spec.js"
   },
