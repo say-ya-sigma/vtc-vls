@@ -2,7 +2,7 @@ name: release to npmjs.com
 on:
   push:
     branches:
-      - main
+      - master
     tags:
       - '!*'
 
