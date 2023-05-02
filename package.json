@@ -4,8 +4,7 @@
   "description": "a type checker for Vue2 SFC include template.",
   "main": "dist/index.js",
   "bin": {
-    "vue-type-check": "dist/cli.js",
-    "vtc": "dist/cli.js"
+    "vtc-vls": "dist/cli.js"
   },
   "scripts": {
     "compile": "tsc -p .",
