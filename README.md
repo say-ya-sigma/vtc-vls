@@ -1,82 +1,40 @@
-<p align="center">
-  <img width="100px" height="100px" src="https://raw.githubusercontent.com/Yuyz0112/vue-type-check/master/assets/logo.png">
-</p>
+# vtc-vls
 
-# vue-type-check
+vtc-vls is fork project from vue-type-check
 
-vue-type-check is a type checker for typescript written Vue components.
+[https://github.com/Yuyz0112/vue-type-check](https://github.com/Yuyz0112/vue-type-check)
 
-It provides both a CLI wrapper and a programmatically API which is easy to integrate with your current workflow.
+upgrade vetur library from...
+
+- "vue-language-server": "^0.0.67"
+
+to...
+
+- "vls": "^0.8.5"
+
+This allows it to be used for recent Vue2, Nuxt2 projects.
 
 ## Features
 
 - type checking template code.
 - type checking script code.
 
+## Changes
+
+Workspace is new npm feature. I use rootDir instead.
+
+--workspace -> --rootDir
+
 ## Usage
 
 ### CLI
 
 ```shell
-Install: npm i -g vue-type-check
+Install: npm i -g vtc-vls
 
-Usage: vue-type-check or vtc
+Usage: vtc-vls
 Options:
-  --workspace        path to your workspace, required
+  --rootDir          path to your project root dir, required
   --srcDir           path to the folder which contains your Vue components, will fallback to the workspace when not passed
   --onlyTemplate     whether to check the script code in a single file component
 ```
-
-#### Example
-
-We are going to check a simple Vue component with two type errors:
-
-```vue
-<template>
-  <div id="app">
-    <p>{{ msg }}</p>
-  </div>
-</template>
-
-<script lang="ts">
-import Vue from "vue";
-
-export default Vue.extend({
-  name: "app",
-  data() {
-    return {
-      message: "Hello World!"
-    };
-  },
-  methods: {
-    printMessage() {
-      console.log(this.message.toFixed(1));
-    }
-  }
-});
-</script>
-```
-
-![example.gif](https://raw.githubusercontent.com/Yuyz0112/vue-type-check/master/assets/vtc.gif)
-
-### Programmatical API
-
-```js
-const { check } = require("vue-type-check");
-
-(async () => {
-  await check({
-    workspace: PATH_TO_WORKSPACE,
-    srcDir: PATH_TO_SRC_DIR,
-    excludeDir: PATH_TO_EXCLUDE_DIR,
-    onlyTemplate: TRUE_OR_FALSE,
-    onlyTypeScript: TRUE_OR_FALSE
-  });
-})();
-```
-
-## How it works
-
-Currently, the implementation is heavily based on vetur's awesome [interpolation feature](https://vuejs.github.io/vetur/guide/interpolation.html).
-
-If you are interested in the design decisions and the attempts on other approaches, they can be found in [this post](http://www.myriptide.com/vue-type-check/).
